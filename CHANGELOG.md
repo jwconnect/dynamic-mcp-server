@@ -5,6 +5,22 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.1.0] - 2025-11-12
+
+### Added
+- **핸들러 제거 기능**: 서버에서 할당된 핸들러를 제거할 수 있는 "✖ 제거" 버튼 추가
+- **할당된 핸들러 조회 API**: `GET /api/handlers/assigned/:serverName` 엔드포인트 추가
+- **핸들러 제거 API**: `POST /api/handlers/remove` 엔드포인트 추가
+- **서버 드롭존에 할당된 핸들러 표시**: 각 서버에 할당된 핸들러를 카드 형태로 표시
+
+### Changed
+- **테스트 모달 UI 개선**: 입력 스키마를 읽기 전용 필드로 분리, 테스트 파라미터는 별도로 수정 가능하게 개선
+- **모달 크기 확대**: 테스트 모달의 최대 너비를 600px에서 800px로 확대
+- **읽기 전용 스타일 추가**: 회색 배경과 cursor: not-allowed로 스키마 필드 구분
+
+### Fixed
+- 핸들러 제거 후 자동 재렌더링으로 UI 동기화 문제 해결
+
 ## [2.0.0] - 2025-11-12
 
 ### Added
