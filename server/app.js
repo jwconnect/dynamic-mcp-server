@@ -6,6 +6,8 @@ import { StreamableHTTPServerTransport } from '@modelcontextprotocol/sdk/server/
 import logger from './logger.js';
 import * as configController from './api/config.controller.js';
 import * as logsController from './api/logs.controller.js';
+import * as handlersController from './api/handlers.controller.js';
+import * as serversController from './api/servers.controller.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -35,6 +37,20 @@ export function createApp(serverManager) {
   app.get('/api/status', configController.getStatus);
   app.get('/api/logs', logsController.getLogs);
   app.delete('/api/logs', logsController.clearLogs);
+
+  // 핸들러 API 라우트
+  app.get('/api/handlers/scan', handlersController.scanHandlers);
+  app.post('/api/handlers/test', handlersController.testHandler);
+  app.post('/api/handlers/move', handlersController.moveHandler);
+  app.post('/api/handlers/toggle', handlersController.toggleHandler);
+
+  // 서버 API 라우트
+  app.get('/api/servers', serversController.getServers);
+  app.get('/api/servers/:name', serversController.getServer);
+  app.post('/api/servers', serversController.createServer);
+  app.put('/api/servers/:name', serversController.updateServer);
+  app.delete('/api/servers/:name', serversController.deleteServer);
+  app.post('/api/servers/:name/toggle', serversController.toggleServer);
 
   // MCP 프로토콜 엔드포인트
   app.post('/mcp', async (req, res) => {

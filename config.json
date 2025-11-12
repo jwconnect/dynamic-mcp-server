@@ -75,6 +75,15 @@
         }
       ],
       "prompts": []
+    },
+    {
+      "name": "engineering-server",
+      "version": "1.0.0",
+      "description": "공학 계산기 전용 MCP 서버",
+      "enabled": true,
+      "tools": [],
+      "resources": [],
+      "prompts": []
     }
   ]
 }
