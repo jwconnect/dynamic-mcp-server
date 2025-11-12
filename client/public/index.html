@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Dynamic MCP Server - Admin UI</title>
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <div class="container">
+      <!-- 헤더 -->
+      <header class="header">
+        <h1>🚀 Dynamic MCP Server</h1>
+        <p class="subtitle">동적 MCP 서버 관리 대시보드</p>
+      </header>
+
+      <!-- 상태 카드 -->
+      <section class="status-section">
+        <div class="card status-card">
+          <h2>📊 서버 상태</h2>
+          <div id="status-content" class="status-content">
+            <div class="status-item">
+              <span class="label">상태:</span>
+              <span id="server-status" class="value">로딩 중...</span>
+            </div>
+            <div class="status-item">
+              <span class="label">가동 시간:</span>
+              <span id="server-uptime" class="value">-</span>
+            </div>
+            <div class="status-item">
+              <span class="label">활성 서버:</span>
+              <span id="active-servers" class="value">-</span>
+            </div>
+            <div class="status-item">
+              <span class="label">전체 서버:</span>
+              <span id="total-servers" class="value">-</span>
+            </div>
+          </div>
+          <button id="refresh-status-btn" class="btn btn-secondary">
+            🔄 새로고침
+          </button>
+        </div>
+      </section>
+
+      <!-- 탭 네비게이션 -->
+      <nav class="tabs">
+        <button class="tab-btn active" data-tab="config">⚙️ 설정 관리</button>
+        <button class="tab-btn" data-tab="logs">📝 로그 뷰어</button>
+        <button class="tab-btn" data-tab="docs">📖 문서</button>
+      </nav>
+
+      <!-- 설정 관리 탭 -->
+      <section id="config-tab" class="tab-content active">
+        <div class="card">
+          <div class="card-header">
+            <h2>⚙️ 설정 파일 (config.json)</h2>
+            <div class="button-group">
+              <button id="load-config-btn" class="btn btn-secondary">
+                📥 불러오기
+              </button>
+              <button id="save-config-btn" class="btn btn-primary">
+                💾 저장하기
+              </button>
+            </div>
+          </div>
+          <textarea
+            id="config-editor"
+            class="config-editor"
+            placeholder="설정 파일을 불러오는 중..."
+          ></textarea>
+          <div class="help-text">
+            💡 설정을 수정한 후 "저장하기" 버튼을 클릭하면 서버가 자동으로
+            재로딩됩니다.
+          </div>
+        </div>
+      </section>
+
+      <!-- 로그 뷰어 탭 -->
+      <section id="logs-tab" class="tab-content">
+        <div class="card">
+          <div class="card-header">
+            <h2>📝 서버 로그</h2>
+            <div class="button-group">
+              <select id="log-type-select" class="select">
+                <option value="combined">전체 로그</option>
+                <option value="error">에러 로그</option>
+              </select>
+              <button id="refresh-logs-btn" class="btn btn-secondary">
+                🔄 새로고침
+              </button>
+              <button id="clear-logs-btn" class="btn btn-danger">
+                🗑️ 로그 삭제
+              </button>
+            </div>
+          </div>
+          <div id="logs-container" class="logs-container">
+            <p class="placeholder">로그를 불러오는 중...</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- 문서 탭 -->
+      <section id="docs-tab" class="tab-content">
+        <div class="card">
+          <h2>📖 사용 가이드</h2>
+
+          <h3>🔌 MCP 클라이언트 연결 방법</h3>
+
+          <h4>1. Claude Desktop</h4>
+          <p>
+            <code>~/Library/Application Support/Claude/claude_desktop_config.json</code> 파일에 다음 설정을 추가하세요:
+          </p>
+          <pre><code>{
+  "mcpServers": {
+    "dynamic-mcp": {
+      "url": "http://localhost:3000/mcp",
+      "transport": "http"
+    }
+  }
+}</code></pre>
+
+          <h4>2. Claude Code (CLI)</h4>
+          <pre><code>claude mcp add --transport http dynamic-mcp http://localhost:3000/mcp</code></pre>
+
+          <h4>3. VS Code</h4>
+          <pre><code>code --add-mcp '{"name":"dynamic-mcp","type":"http","url":"http://localhost:3000/mcp"}'</code></pre>
+
+          <h4>4. MCP Inspector (테스트용)</h4>
+          <pre><code>npx @modelcontextprotocol/inspector</code></pre>
+          <p>그 다음 <code>http://localhost:3000/mcp</code>에 연결하세요.</p>
+
+          <h3>⚙️ 설정 파일 구조</h3>
+          <p>
+            <code>config.json</code> 파일은 다음과 같은 구조를 가집니다:
+          </p>
+          <ul>
+            <li>
+              <strong>global</strong>: 서버 전역 설정 (포트, 호스트, 로그 레벨)
+            </li>
+            <li>
+              <strong>servers</strong>: MCP 서버 목록 (배열)
+              <ul>
+                <li><strong>name</strong>: 서버 고유 이름</li>
+                <li><strong>enabled</strong>: 활성화 여부</li>
+                <li><strong>tools</strong>: 제공할 도구 목록</li>
+                <li><strong>resources</strong>: 제공할 리소스 목록</li>
+                <li><strong>prompts</strong>: 제공할 프롬프트 목록</li>
+              </ul>
+            </li>
+          </ul>
+
+          <h3>🛠️ 커스텀 핸들러 작성</h3>
+          <p>
+            <code>server/handlers/</code> 디렉토리에 새로운 핸들러 파일을
+            작성하고, <code>config.json</code>에서 참조하세요.
+          </p>
+          <pre><code>// server/handlers/my-handler.js
+export async function myFunction({ param1, param2 }) {
+  return {
+    result: param1 + param2
+  };
+}</code></pre>
+        </div>
+      </section>
+
+      <!-- 푸터 -->
+      <footer class="footer">
+        <p>
+          Made with ❤️ by
+          <a href="https://github.com" target="_blank">Manus AI</a>
+        </p>
+      </footer>
+    </div>
+
+    <!-- 알림 토스트 -->
+    <div id="toast" class="toast"></div>
+
+    <script src="app.js"></script>
+  </body>
+</html>
