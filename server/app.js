@@ -40,8 +40,10 @@ export function createApp(serverManager) {
 
   // 핸들러 API 라우트
   app.get('/api/handlers/scan', handlersController.scanHandlers);
+  app.get('/api/handlers/assigned/:serverName', handlersController.getAssignedHandlers);
   app.post('/api/handlers/test', handlersController.testHandler);
   app.post('/api/handlers/move', handlersController.moveHandler);
+  app.post('/api/handlers/remove', handlersController.removeHandler);
   app.post('/api/handlers/toggle', handlersController.toggleHandler);
 
   // 서버 API 라우트

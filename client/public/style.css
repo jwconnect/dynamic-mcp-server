@@ -462,6 +462,39 @@ body {
   gap: 8px;
 }
 
+.assigned-handler-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px;
+  background: white;
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  transition: all 0.3s;
+}
+
+.assigned-handler-item:hover {
+  border-color: var(--primary-color);
+  box-shadow: var(--shadow);
+}
+
+.assigned-handler-info {
+  flex: 1;
+}
+
+.assigned-handler-title {
+  font-weight: 600;
+  font-size: 0.95rem;
+  color: var(--text-primary);
+  margin-bottom: 4px;
+}
+
+.assigned-handler-meta {
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+  font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+}
+
 /* 설정 에디터 */
 .config-editor {
   width: 100%;
@@ -607,6 +640,10 @@ body {
   animation: slideUp 0.3s;
 }
 
+.modal-content.modal-large {
+  max-width: 800px;
+}
+
 .modal-header {
   display: flex;
   justify-content: space-between;
@@ -652,6 +689,14 @@ body {
   font-size: 0.85rem;
   max-height: 300px;
   overflow-y: auto;
+}
+
+.schema-readonly {
+  background: #f8f9fa !important;
+  color: var(--text-secondary);
+  cursor: not-allowed;
+  font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+  font-size: 0.85rem;
 }
 
 /* 코드 블록 */

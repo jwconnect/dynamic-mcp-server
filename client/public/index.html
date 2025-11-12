@@ -245,15 +245,19 @@ export async function myFunction({ param1, param2 }) {
 
     <!-- 모달: 핸들러 테스트 -->
     <div id="test-modal" class="modal">
-      <div class="modal-content">
+      <div class="modal-content modal-large">
         <div class="modal-header">
           <h3 id="test-modal-title">핸들러 테스트</h3>
           <button class="modal-close">&times;</button>
         </div>
         <div class="modal-body">
           <div class="form-group">
-            <label>입력 파라미터 (JSON)</label>
-            <textarea id="test-params" class="input" rows="5" placeholder='{"a": 5, "b": 3}'></textarea>
+            <label>입력 스키마 (읽기 전용)</label>
+            <textarea id="test-schema" class="input schema-readonly" rows="6" readonly></textarea>
+          </div>
+          <div class="form-group">
+            <label>테스트 파라미터 (JSON)</label>
+            <textarea id="test-params" class="input" rows="4" placeholder='{"a": 5, "b": 3}'></textarea>
           </div>
           <div class="form-group">
             <label>실행 결과</label>

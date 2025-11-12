@@ -12,6 +12,8 @@ const state = {
 
 // DOM 요소
 const elements = {
+  // 테스트 모달 요소
+  testSchema: document.getElementById('test-schema'),
   // 상태
   serverStatus: document.getElementById('server-status'),
   serverUptime: document.getElementById('server-uptime'),
@@ -444,22 +446,54 @@ function renderHandlers() {
   });
 }
 
-function renderServerDropzones() {
+async function renderServerDropzones() {
   if (state.servers.length === 0) {
     elements.serversDropzones.innerHTML = '<p class="placeholder">서버가 없습니다</p>';
     return;
   }
 
-  elements.serversDropzones.innerHTML = state.servers
+  // 각 서버의 할당된 핸들러 조회
+  const serversWithHandlers = await Promise.all(
+    state.servers.map(async (server) => {
+      try {
+        const response = await fetch(`${API_BASE}/api/handlers/assigned/${server.name}`);
+        const data = await response.json();
+        return {
+          ...server,
+          assignedHandlers: data.success ? data.data.handlers : []
+        };
+      } catch (error) {
+        return {
+          ...server,
+          assignedHandlers: []
+        };
+      }
+    })
+  );
+
+  elements.serversDropzones.innerHTML = serversWithHandlers
     .map(
       (server) => `
     <div class="server-dropzone" data-server-name="${server.name}">
       <div class="server-dropzone-header">
         <div class="server-dropzone-title">${server.name}</div>
-        <div class="server-dropzone-count">${server.toolsCount} 핸들러</div>
+        <div class="server-dropzone-count">${server.assignedHandlers.length} 핸들러</div>
       </div>
       <div class="server-dropzone-handlers" id="dropzone-${server.name}">
-        <p class="placeholder" style="padding: 20px;">핸들러를 여기로 드래그하세요</p>
+        ${server.assignedHandlers.length === 0 
+          ? '<p class="placeholder" style="padding: 20px;">핸들러를 여기로 드래그하세요</p>'
+          : server.assignedHandlers.map(h => `
+            <div class="assigned-handler-item">
+              <div class="assigned-handler-info">
+                <div class="assigned-handler-title">${h.title}</div>
+                <div class="assigned-handler-meta">${h.function}</div>
+              </div>
+              <button class="btn btn-danger btn-small" onclick="removeHandlerFromServer('${server.name}', '${h.id}')">
+                ✖ 제거
+              </button>
+            </div>
+          `).join('')
+        }
       </div>
     </div>
   `
@@ -527,7 +561,17 @@ function openTestModal(handlerId) {
 
   state.currentHandler = handler;
   elements.testModalTitle.textContent = `테스트: ${handler.title}`;
-  elements.testParams.value = JSON.stringify(handler.inputSchema, null, 2);
+  
+  // 스키마를 읽기 전용 필드에 표시
+  elements.testSchema.value = JSON.stringify(handler.inputSchema, null, 2);
+  
+  // 테스트 파라미터는 샘플 값으로 초기화
+  const sampleParams = {};
+  Object.keys(handler.inputSchema).forEach(key => {
+    sampleParams[key] = '';
+  });
+  elements.testParams.value = JSON.stringify(sampleParams, null, 2);
+  
   elements.testResult.textContent = '테스트를 실행하려면 "실행" 버튼을 클릭하세요';
   showModal(elements.testModal);
 }
@@ -659,7 +703,36 @@ window.addEventListener('DOMContentLoaded', () => {
   setInterval(fetchStatus, 30000);
 });
 
+async function removeHandlerFromServer(serverName, handlerId) {
+  if (!confirm(`정말로 이 핸들러를 ${serverName}에서 제거하시겠습니까?`)) {
+    return;
+  }
+
+  try {
+    const response = await fetch(`${API_BASE}/api/handlers/remove`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ serverName, handlerId })
+    });
+
+    const data = await response.json();
+
+    if (data.success) {
+      showToast('핸들러가 제거되었습니다', 'success');
+      // 서버 드롭존 재렌더링
+      await renderServerDropzones();
+      // 서버 목록도 재로드
+      await loadServers();
+    } else {
+      throw new Error(data.error);
+    }
+  } catch (error) {
+    showToast('핸들러 제거 실패: ' + error.message, 'error');
+  }
+}
+
 // 전역 함수 (HTML onclick에서 사용)
 window.toggleServer = toggleServer;
 window.deleteServer = deleteServer;
 window.openTestModal = openTestModal;
+window.removeHandlerFromServer = removeHandlerFromServer;

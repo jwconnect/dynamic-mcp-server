@@ -254,6 +254,111 @@ export async function moveHandler(req, res) {
 }
 
 /**
+ * 서버에서 핸들러 제거
+ * POST /api/handlers/remove
+ */
+export async function removeHandler(req, res) {
+  try {
+    const { serverName, handlerId } = req.body;
+
+    if (!serverName || !handlerId) {
+      return res.status(400).json({
+        success: false,
+        error: 'Server name and handler ID are required'
+      });
+    }
+
+    const configPath = path.resolve(__dirname, '../../config.json');
+    const configContent = await fs.readFile(configPath, 'utf-8');
+    const config = JSON.parse(configContent);
+
+    const server = config.servers.find(s => s.name === serverName);
+    if (!server) {
+      return res.status(404).json({
+        success: false,
+        error: 'Server not found'
+      });
+    }
+
+    const toolIndex = server.tools.findIndex(t => 
+      `${t.handler.path.replace('handlers/', '').replace('.js', '')}_${t.handler.function}` === handlerId
+    );
+
+    if (toolIndex === -1) {
+      return res.status(404).json({
+        success: false,
+        error: 'Handler not found in server'
+      });
+    }
+
+    // 핸들러 제거
+    server.tools.splice(toolIndex, 1);
+
+    await fs.writeFile(configPath, JSON.stringify(config, null, 2), 'utf-8');
+
+    logger.info('Handler removed from server', { serverName, handlerId });
+
+    res.json({
+      success: true,
+      message: 'Handler removed successfully'
+    });
+  } catch (error) {
+    logger.error('Failed to remove handler', { error: error.message });
+    res.status(500).json({
+      success: false,
+      error: 'Failed to remove handler'
+    });
+  }
+}
+
+/**
+ * 특정 서버에 할당된 핸들러 목록 조회
+ * GET /api/handlers/assigned/:serverName
+ */
+export async function getAssignedHandlers(req, res) {
+  try {
+    const { serverName } = req.params;
+
+    const configPath = path.resolve(__dirname, '../../config.json');
+    const configContent = await fs.readFile(configPath, 'utf-8');
+    const config = JSON.parse(configContent);
+
+    const server = config.servers.find(s => s.name === serverName);
+    if (!server) {
+      return res.status(404).json({
+        success: false,
+        error: 'Server not found'
+      });
+    }
+
+    const assignedHandlers = server.tools.map(tool => ({
+      id: `${tool.handler.path.replace('handlers/', '').replace('.js', '')}_${tool.handler.function}`,
+      name: tool.name,
+      title: tool.title,
+      description: tool.description,
+      path: tool.handler.path,
+      function: tool.handler.function,
+      enabled: tool.enabled !== false
+    }));
+
+    res.json({
+      success: true,
+      data: {
+        serverName,
+        handlers: assignedHandlers,
+        total: assignedHandlers.length
+      }
+    });
+  } catch (error) {
+    logger.error('Failed to get assigned handlers', { error: error.message });
+    res.status(500).json({
+      success: false,
+      error: 'Failed to get assigned handlers'
+    });
+  }
+}
+
+/**
  * 핸들러 사용 여부 토글
  * POST /api/handlers/toggle
  */

@@ -1,9 +1,4 @@
 {
-  "global": {
-    "port": 3000,
-    "host": "0.0.0.0",
-    "logLevel": "info"
-  },
   "servers": [
     {
       "name": "demo-server",
@@ -15,59 +10,43 @@
           "name": "add",
           "title": "덧셈 계산기",
           "description": "두 숫자를 더합니다",
-          "inputSchema": {
-            "a": {
-              "type": "number",
-              "description": "첫 번째 숫자"
-            },
-            "b": {
-              "type": "number",
-              "description": "두 번째 숫자"
-            }
-          },
-          "outputSchema": {
-            "result": {
-              "type": "number",
-              "description": "덧셈 결과"
-            }
-          },
           "handler": {
             "path": "handlers/calculator.js",
             "function": "add"
+          },
+          "inputSchema": {
+            "type": "object",
+            "properties": {
+              "a": { "type": "number" },
+              "b": { "type": "number" }
+            },
+            "required": ["a", "b"]
           }
         },
         {
           "name": "multiply",
           "title": "곱셈 계산기",
           "description": "두 숫자를 곱합니다",
-          "inputSchema": {
-            "a": {
-              "type": "number",
-              "description": "첫 번째 숫자"
-            },
-            "b": {
-              "type": "number",
-              "description": "두 번째 숫자"
-            }
-          },
-          "outputSchema": {
-            "result": {
-              "type": "number",
-              "description": "곱셈 결과"
-            }
-          },
           "handler": {
             "path": "handlers/calculator.js",
             "function": "multiply"
+          },
+          "inputSchema": {
+            "type": "object",
+            "properties": {
+              "a": { "type": "number" },
+              "b": { "type": "number" }
+            },
+            "required": ["a", "b"]
           }
         }
       ],
       "resources": [
         {
-          "uri": "greeting://{name}",
+          "uri": "greeting://hello",
           "name": "greeting",
-          "title": "인사말 리소스",
-          "description": "이름을 받아 인사말을 생성합니다",
+          "description": "인사말 메시지",
+          "mimeType": "text/plain",
           "handler": {
             "path": "handlers/greeting.js",
             "function": "getGreeting"
@@ -85,5 +64,9 @@
       "resources": [],
       "prompts": []
     }
-  ]
+  ],
+  "global": {
+    "logLevel": "info",
+    "port": 3000
+  }
 }
